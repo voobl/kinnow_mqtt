@@ -298,21 +298,34 @@ class KinnowMqttClient {
   }
 
   bool _pingRespReceived = false;
-
+  Timer? _pingTimer;
   static const _malformedPacketDisconnectPacket =
       DisconnectPacket(DisconnectReasonCode.malformedPacket);
 
   void _sendPingReq() {
+    // إرسال البايتات
     networkConnection
         .transmit(MqttFixedHeader(MqttPacketType.pingreq, 0, 0).toBytes());
     _pingRespReceived = false;
-    _eventController.add(PingReqSent());
-    Timer(
+
+    // ✨ تحقق قبل الإضافة
+    if (!_eventController.isClosed) {
+      _eventController.add(PingReqSent());
+    }
+
+    // ✨ خزّن الـ Timer وألغيه لاحقًا في dispose
+    _pingTimer = Timer(
       const Duration(seconds: 3),
       () {
         if (_pingRespReceived) return;
-        _eventController.add(PingRespNotReceived());
-        _activeConnectionState?.pingRespTimeoutCompleter.complete(null);
+
+        if (!_eventController.isClosed) {
+          _eventController.add(PingRespNotReceived());
+        }
+
+        if (!(_activeConnectionState?.pingRespTimeoutCompleter.isCompleted ?? true)) {
+          _activeConnectionState?.pingRespTimeoutCompleter.complete(null);
+        }
       },
     );
   }
@@ -698,6 +711,11 @@ class KinnowMqttClient {
   }
 
   Future<void> _dispose() async {
+
+ _pingTimer?.cancel();
+    _pingTimer = null;
+
+  
     _activeConnectionState?.dispose();
     await _eventController.close();
     await _connectionStatusController.close();
