@@ -571,7 +571,7 @@ class KinnowMqttClient {
   Future<(PubrecPacket, PubcompPacket)?> _publishQos2Internal(
       TxPublishPacket pubPkt,
       {int? storageId}) async {
-    storageId ??= await storage?.storeMessage(MqttQos.atMostOnce, pubPkt);
+    storageId ??= await storage?.storeMessage(MqttQos.exactlyOnce, pubPkt);
     bool isDuplicate = false;
     final token = _operationQueue.generateToken();
     final packetId = _generatePacketId();
