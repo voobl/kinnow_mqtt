@@ -302,33 +302,48 @@ class KinnowMqttClient {
   static const _malformedPacketDisconnectPacket =
       DisconnectPacket(DisconnectReasonCode.malformedPacket);
 
-  void _sendPingReq() {
-    // إرسال البايتات
-    networkConnection
-        .transmit(MqttFixedHeader(MqttPacketType.pingreq, 0, 0).toBytes());
-    _pingRespReceived = false;
-
-    // ✨ تحقق قبل الإضافة
-    if (!_eventController.isClosed) {
-      _eventController.add(PingReqSent());
-    }
-
-    // ✨ خزّن الـ Timer وألغيه لاحقًا في dispose
-    _pingTimer = Timer(
-      const Duration(seconds: 3),
-      () {
-        if (_pingRespReceived) return;
-
-        if (!_eventController.isClosed) {
-          _eventController.add(PingRespNotReceived());
-        }
-
-        if (!(_activeConnectionState?.pingRespTimeoutCompleter.isCompleted ?? true)) {
-          _activeConnectionState?.pingRespTimeoutCompleter.complete(null);
-        }
-      },
+void _sendPingReq() {
+  try {
+    // 1. محاولة الإرسال داخل Try
+    networkConnection.transmit(
+      MqttFixedHeader(MqttPacketType.pingreq, 0, 0).toBytes()
     );
+  } catch (e) {
+    // 2. التقاط الخطأ ومنع الانهيار
+    print("KinnowMqtt: فشل إرسال PingReq: $e");
+    
+    // اختياري: قطع الاتصال فوراً لأن السوكت ميت
+    // disconnect(); 
+    
+    // 3. مهم جداً: الخروج من الدالة لكي لا يبدأ المؤقت (Timer)
+    return;
   }
+
+  _pingRespReceived = false;
+
+  // ✨ تحقق قبل الإضافة
+  if (!_eventController.isClosed) {
+    _eventController.add(PingReqSent());
+  }
+
+  // ✨ خزّن الـ Timer
+  _pingTimer = Timer(
+    const Duration(seconds: 3),
+    () {
+      if (_pingRespReceived) return;
+
+      if (!_eventController.isClosed) {
+        _eventController.add(PingRespNotReceived());
+      }
+
+      // إضافة حماية هنا أيضاً للمتغير null
+      if (_activeConnectionState != null && 
+          !_activeConnectionState!.pingRespTimeoutCompleter.isCompleted) {
+        _activeConnectionState!.pingRespTimeoutCompleter.complete(null);
+      }
+    },
+  );
+}
 
   //returns whether to reconnect or not
   Future<bool> _useActiveNetworkConnection() async {
