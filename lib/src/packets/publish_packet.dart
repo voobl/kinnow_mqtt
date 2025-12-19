@@ -210,17 +210,6 @@ class RxPublishPacket {
   static (RxPublishPacket?, bool topicAliasIssue) fromBytes(
       Iterable<int> bytes, int flags, TopicAliasManager topicManager) {
 
-print("===== 📥 DATA DECODED 📥 =====");
-try {
-  // محاولة تحويل البايتات إلى نص مقروء
-  // allowMalformed: true مهم جداً لتجاهل أي بايتات غير نصية (مثل أرقام البروتوكول)
-  String decoded = utf8.decode(bytes.toList(), allowMalformed: true);
-  print("test ==> ${decoded}");
-} catch (e) {
-  print("Could not decode bytes to string: $e");
-}
-print("==============================");
-
     
     final isDuplicate = flags & 0x08 == 0x08;
     final qosVal = ((flags >> 1) & 0x03);
