@@ -215,7 +215,7 @@ try {
   // محاولة تحويل البايتات إلى نص مقروء
   // allowMalformed: true مهم جداً لتجاهل أي بايتات غير نصية (مثل أرقام البروتوكول)
   String decoded = utf8.decode(bytes.toList(), allowMalformed: true);
-  print(decoded);
+  print("test ==> ${decoded}");
 } catch (e) {
   print("Could not decode bytes to string: $e");
 }
