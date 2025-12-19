@@ -2,7 +2,7 @@ import '../byte_utils.dart';
 import '../mqtt_fixed_header.dart';
 import '../mqtt_packet_types.dart';
 import '../mqtt_qos.dart';
-
+import 'dart:convert';
 /// A Publish packet sent from client to server
 class TxPublishPacket {
   /// Whether to retain this message
