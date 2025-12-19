@@ -152,7 +152,6 @@ class RxPublishPacket {
   ///
   /// in case alias is used the library will replace the alias with the actual topic
   final String topic;
-  final int? publish_at;
   /// the message body
   final StringOrBytes payload;
 
@@ -194,7 +193,6 @@ class RxPublishPacket {
   RxPublishPacket(
     this.retain,
     this.topic,
-    this.publish_at,
     this.payload,
     this.qos,
     this.payloadFormat,
@@ -211,6 +209,22 @@ class RxPublishPacket {
 
   static (RxPublishPacket?, bool topicAliasIssue) fromBytes(
       Iterable<int> bytes, int flags, TopicAliasManager topicManager) {
+
+try {
+      final byteList = bytes.toList(); // تحويل إلى قائمة لسهولة التعامل
+      print("===== 📥 MQTT RAW DATA RECEIVED 📥 =====");
+      print("Flags: $flags");
+      print("Raw Bytes (List): $byteList");
+      
+      // تحويل إلى Hex String لسهولة قراءة البروتوكول
+      String hexString = byteList.map((b) => b.toRadixString(16).padLeft(2, '0').toUpperCase()).join(' ');
+      print("Raw Bytes (Hex): $hexString");
+      print("========================================");
+    } catch (e) {
+      print("Error printing raw bytes: $e");
+    }
+
+    
     final isDuplicate = flags & 0x08 == 0x08;
     final qosVal = ((flags >> 1) & 0x03);
     if (qosVal > 2) return (null, false);
