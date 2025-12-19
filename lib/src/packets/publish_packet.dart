@@ -14,7 +14,6 @@ class TxPublishPacket {
 
   /// the topic to which the message will be sent
   final String topic;
-  final int? receivedAt;
   /// the main body of the message
   final StringOrBytes payload;
 
@@ -48,9 +47,7 @@ class TxPublishPacket {
   TxPublishPacket(
     this.retain,
     this.topic,
-  
     this.payload, {
-    this.receivedAt,
     this.payloadFormat,
     this.messageExpiryInterval,
     this.responseTopic,
