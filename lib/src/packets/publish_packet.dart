@@ -152,7 +152,7 @@ class RxPublishPacket {
   ///
   /// in case alias is used the library will replace the alias with the actual topic
   final String topic;
-
+  final int? publish_at;
   /// the message body
   final StringOrBytes payload;
 
@@ -194,6 +194,7 @@ class RxPublishPacket {
   RxPublishPacket(
     this.retain,
     this.topic,
+    this.publish_at,
     this.payload,
     this.qos,
     this.payloadFormat,
