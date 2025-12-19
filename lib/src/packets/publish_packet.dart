@@ -48,8 +48,9 @@ class TxPublishPacket {
   TxPublishPacket(
     this.retain,
     this.topic,
-    this.receivedAt,
+  
     this.payload, {
+    this.receivedAt,
     this.payloadFormat,
     this.messageExpiryInterval,
     this.responseTopic,
